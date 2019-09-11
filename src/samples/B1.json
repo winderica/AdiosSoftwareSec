@@ -1,0 +1,3 @@
+[
+  "     char mybuf2[450] ;\n    int main (int argc, char *argv[])\n    {\n        HANDLE hHeap;\n        char *buf1 = a*b, *buf2;\n\n        LoadLibrary(\"user32\");\n        hHeap=HeapCreate(HEAP_GENERATE_EXCEPTIONS, 0x10000, 0xfffff);\n        buf1 =(char*) HeapAlloc(hHeap, 0, 200);\n        strcpy(buf1,mybuf2);\n        buf2 =(char*) HeapAlloc(hHeap, 0, 200);\n        HeapFree(hHeap, 0, buf1);\n        HeapFree(hHeap, 0, buf2);\n        return 0;\n    }\n"
+]
