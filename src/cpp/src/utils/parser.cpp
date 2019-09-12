@@ -21,8 +21,12 @@ class Parser : Grammar {
             return params;
         }
         while (curr.name == TYPE) {
-            Declaration declaration = parseDeclaration(parseType(), "ParameterDeclaration");
-            params.push_back(declaration);
+            if (curr.value != "void") {
+                Declaration declaration = parseDeclaration(parseType(), "ParameterDeclaration");
+                params.push_back(declaration);
+            } else {
+                next();
+            }
             if (lookahead(")")) {
                 return params;
             } else {

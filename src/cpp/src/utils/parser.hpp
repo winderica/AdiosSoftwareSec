@@ -405,6 +405,16 @@ void to_json(json &j, const WhileStatement &p) {
     };
 }
 
+void to_json(json &j, const DoWhileStatement &p) {
+    j = json{
+        {"kind",       p.kind},
+        {"lineNumber", p.lineNumber},
+        {"lineOffset", p.lineOffset},
+        {"body",       p.body},
+        {"condition",  p.condition},
+    };
+}
+
 void to_json(json &j, const ForStatement &p) {
     j = json{
         {"kind",       p.kind},
