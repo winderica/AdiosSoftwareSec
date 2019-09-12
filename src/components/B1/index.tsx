@@ -32,7 +32,7 @@ export const B1 = () => {
     const [result, setResult] = useState<Result[]>([]);
     const classes = useStyles();
     const [code1, setCode1] = useState(0);
-    const [types, setTypes] = useState('');
+    const [types, setTypes] = useState('WSADATA,SOCKET,sockaddr_in,HANDLE');
 
     const run = () => {
         try {

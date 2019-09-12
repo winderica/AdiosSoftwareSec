@@ -25,7 +25,7 @@ export const R3 = () => {
     const classes = useStyles();
     const [code1, setCode1] = useState(0);
     const [code2, setCode2] = useState(0);
-    const [types, setTypes] = useState('');
+    const [types, setTypes] = useState('strbuf,column_data,string_list,column_options');
 
     const run = () => {
         try {
