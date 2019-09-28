@@ -189,17 +189,6 @@ class AOFinder {
                         result.push_back(data);
                     }
                 }
-//                else {
-//                    json data = json(
-//                        {
-//                            {"operator",    op},
-//                            {"lineNumber",  source["lineNumber"]},
-//                            {"lineOffset",  source["lineOffset"]},
-//                            {"description", "operator " + op + " may cause overflow"}
-//                        }
-//                    );
-//                    result.push_back(data);
-//                }
             }
             traverse(left);
             traverse(right);
@@ -251,15 +240,19 @@ class AOFinder {
         } else if (kind == "ForStatement") {
             json init = source["init"];
             for (const json &subInit: init) {
-                traverse(subInit);
+                if (!subInit.is_null()) {
+                    traverse(subInit);
+                }
             }
             json condition = source["condition"];
             if (!condition.is_null()) {
                 traverse(condition);
             }
             json step = source["step"];
-            if (!step.is_null()) {
-                traverse(step);
+            for (const json &subStep: step) {
+                if (!subStep.is_null()) {
+                    traverse(subStep);
+                }
             }
             traverse(source["body"]);
         } else if (kind == "WhileStatement") {

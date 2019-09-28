@@ -112,15 +112,19 @@ class CFGGenerator {
         } else if (kind == "ForStatement") {
             json init = source["init"];
             for (const json &subInit: init) {
-                traverse(subInit);
+                if (!subInit.is_null()) {
+                    traverse(subInit);
+                }
             }
             json condition = source["condition"];
             if (!condition.is_null()) {
                 traverse(condition);
             }
             json step = source["step"];
-            if (!step.is_null()) {
-                traverse(step);
+            for (const json &subStep: step) {
+                if (!subStep.is_null()) {
+                    traverse(subStep);
+                }
             }
             traverse(source["body"]);
         } else if (kind == "WhileStatement") {
@@ -178,14 +182,14 @@ public:
     }
 };
 
-typedef vector <vector<string>> StringArrArr;
+typedef vector<vector<string>> StringArrArr;
 
 auto getIdentities(json cfg) {
     StringArrArr calleeArrArr;
     StringArrArr argArrArr;
     for (auto &item : cfg.items()) {
-        vector <string> calleeArr;
-        vector <string> argArr;
+        vector<string> calleeArr;
+        vector<string> argArr;
         json::array_t functions = item.value();
         for (auto function:functions) {
             calleeArr.push_back(function["callee"]["name"]);
@@ -212,22 +216,32 @@ auto getIdentities(json cfg) {
 double calcDistance(StringArrArr a1, StringArrArr a2) {
     int size1 = 0;
     int size2 = 0;
-    for_each(a1.begin(), a1.end(), [&](const vector <string> &arr) { size1 += arr.size(); });
-    for_each(a2.begin(), a2.end(), [&](const vector <string> &arr) { size2 += arr.size(); });
+    for_each(a1.begin(), a1.end(), [&](const vector<string> &arr) { size1 += arr.size(); });
+    for_each(a2.begin(), a2.end(), [&](const vector<string> &arr) { size2 += arr.size(); });
     double distance = 0;
-    for (const auto &arr1: a1) {
-        vector<int> distances;
-        for (const auto &arr2: a2) {
-            distances.push_back(levenshteinDistance(arr1, arr2));
+    if (a1.size() > a2.size()) {
+        for (const auto &arr1: a2) {
+            vector<int> distances;
+            for (const auto &arr2: a1) {
+                distances.push_back(levenshteinDistance(arr1, arr2));
+            }
+            distance += *min_element(distances.begin(), distances.end());
         }
-        distance += *min_element(distances.begin(), distances.end());
+    } else {
+        for (const auto &arr1: a1) {
+            vector<int> distances;
+            for (const auto &arr2: a2) {
+                distances.push_back(levenshteinDistance(arr1, arr2));
+            }
+            distance += *min_element(distances.begin(), distances.end());
+        }
     }
 
     distance = 1.0 - (double) distance / max({size1, size2});
-    return distance;
+    return max({distance, 0.0});
 }
 
-double compareCFG(string code1, string code2, const vector<string>& types) {
+double compareCFG(string code1, string code2, const vector<string> &types) {
     auto tokens1 = Lexer(move(code1), types).tokenize();
     auto tokens2 = Lexer(move(code2), types).tokenize();
     auto ast1 = Parser(tokens1).parse();

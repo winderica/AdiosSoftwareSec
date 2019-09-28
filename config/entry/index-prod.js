@@ -17,7 +17,6 @@ app.on('ready', async () => {
             nodeIntegration: true,
         }
     });
-    mainWindow.webContents.openDevTools();
     await mainWindow.loadFile('./build/index.html');
     mainWindow.on('closed', function () {
         mainWindow = null;

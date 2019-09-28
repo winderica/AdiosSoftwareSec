@@ -190,7 +190,6 @@ struct Grammar {
         "default",
         "do",
         "else",
-        "enum",
         "for",
         "goto",
         "if",
@@ -220,6 +219,7 @@ struct Grammar {
     json typeModifiers = {
         "auto",
         "const",
+        "enum",
         "extern",
         "register",
         "signed",
@@ -287,12 +287,6 @@ struct Grammar {
      */
     static bool isSpace(char ch);
 
-    /**
-     * Whether current char is illegal
-     * @param ch - current char
-     * @return - result
-     */
-    static bool isIllegal(char ch);
 };
 
 #endif // GRAMMAR_H

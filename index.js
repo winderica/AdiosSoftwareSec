@@ -17,8 +17,7 @@ app.on('ready', async () => {
             nodeIntegration: true,
         }
     });
-    mainWindow.webContents.openDevTools();
-    await mainWindow.loadURL('http://localhost:3000');
+    await mainWindow.loadFile('./build/index.html');
     mainWindow.on('closed', function () {
         mainWindow = null;
     });

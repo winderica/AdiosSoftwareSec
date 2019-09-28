@@ -1,7 +1,8 @@
 #include <thread>
-#include <future>
+//#include <future>
+#include <ppl.h>
 
-double wrappedCompare(string code1, string code2, const vector<string>& types) {
+double wrappedCompare(string code1, string code2, const vector<string> &types) {
     try {
         return compareCFG(move(code1), move(code2), types);
     } catch (...) {
@@ -9,12 +10,19 @@ double wrappedCompare(string code1, string code2, const vector<string>& types) {
     }
 }
 
-vector<double> multithread(const vector<string> &code1Arr, const vector<string> &code2Arr, const vector<string> &types) {
-    vector<double> result;
-    for (int i = 0; i < code1Arr.size(); i++) {
-        auto future = async(wrappedCompare, code1Arr.at(i), code2Arr.at(i), types);
-        result.push_back(future.get());
-    }
+vector<pair<int, double>> multithread(const vector<string> &code1Arr, const vector<string> &code2Arr, const vector<string> &types) {
+    vector<pair<int, double>> result;
+    concurrency::parallel_for(size_t(0), code1Arr.size(), [&](size_t i){
+        result.emplace_back(pair<int, double>(i, wrappedCompare(code1Arr.at(i), code2Arr.at(i), types)));
+    });
+//    vector<future<double>> tasks;
+//    for (int i = 0; i < code1Arr.size(); i++) {
+//        auto future = async(launch::async, wrappedCompare, code1Arr.at(i), code2Arr.at(i), types);
+//        tasks.push_back(move(future));
+//    }
+//    for (auto&& task:tasks) {
+//        result.push_back(task.get());
+//    }
     return result;
 }
 
@@ -48,8 +56,8 @@ Napi::Value Multithread(const Napi::CallbackInfo &info) {
         }
         auto result = Napi::Array::New(env);
         auto similarities = multithread(code1s, code2s, types);
-        for (int i = 0; i < similarities.size(); i++) {
-            result.Set<Napi::Number>(Napi::Number::New(env, i), Napi::Number::New(env, similarities.at(i)));
+        for (auto p : similarities) {
+            result.Set<Napi::Number>(Napi::Number::New(env, p.first), Napi::Number::New(env, p.second));
         }
         return result;
     } catch (exception &e) {

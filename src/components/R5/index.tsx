@@ -1,24 +1,10 @@
-import {
-    Button,
-    Divider,
-    ExpansionPanel,
-    ExpansionPanelDetails,
-    ExpansionPanelSummary,
-    MenuItem,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
-    TextField,
-    Typography
-} from '@material-ui/core';
+import { Button, MenuItem, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@material-ui/core';
 import { useSnackbar } from 'notistack';
 import React, { ChangeEvent, useState } from 'react';
 import codes from '../../samples/R5.json';
 import { useStyles } from '../../styles/style';
 import { getTypes } from '../../utils/getTypes';
-import { CodeHighlight } from '../Highlight';
+import { Expansion } from '../Expansion';
 
 interface Result {
     description: string;
@@ -32,7 +18,7 @@ export const R5 = () => {
     const [result, setResult] = useState<Result[]>([]);
     const classes = useStyles();
     const [code1, setCode1] = useState(0);
-    const [types, setTypes] = useState('');
+    const [types, setTypes] = useState('FILE');
 
     const run = () => {
         try {
@@ -53,14 +39,7 @@ export const R5 = () => {
 
     return (
         <div>
-            <ExpansionPanel>
-                <ExpansionPanelSummary>sample code</ExpansionPanelSummary>
-                <ExpansionPanelDetails className={classes.codeContainer}>
-                    <Typography variant='h4'>code 1</Typography>
-                    <Divider />
-                    <CodeHighlight language='cpp'>{codes[code1]}</CodeHighlight>
-                </ExpansionPanelDetails>
-            </ExpansionPanel>
+            <Expansion code1={codes[code1]} />
             <div className={classes.itemContainer}>
                 <TextField
                     select

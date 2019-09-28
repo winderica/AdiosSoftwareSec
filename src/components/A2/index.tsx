@@ -1,30 +1,19 @@
-import {
-    Button,
-    Divider,
-    ExpansionPanel,
-    ExpansionPanelDetails,
-    ExpansionPanelSummary,
-    FormControl,
-    Input,
-    InputAdornment,
-    InputLabel,
-    MenuItem,
-    TextField,
-    Typography
-} from '@material-ui/core';
+import { Button, Checkbox, FormControl, FormControlLabel, Input, InputAdornment, InputLabel, MenuItem, TextField, Typography } from '@material-ui/core';
 import { useSnackbar } from 'notistack';
 import React, { ChangeEvent, useCallback, useState } from 'react';
-import codes from '../../samples/R3.json';
+import small from '../../samples/A2.json';
+import large from '../../samples/R3.json';
 import { useStyles } from '../../styles/style';
 import { getTypes } from '../../utils/getTypes';
-import { CodeHighlight } from '../Highlight';
+import { Expansion } from '../Expansion';
 
 export const A2 = () => {
     const { enqueueSnackbar } = useSnackbar();
     const [similarities, setSimilarities] = useState<number[]>([]);
     const classes = useStyles();
     const [code1, setCode1] = useState(0);
-    const [types, setTypes] = useState('');
+    const [isLarge, setIsLarge] = useState(false);
+    const [types, setTypes] = useState('size_t,subprocess_start_fn,FILE');
     const [isSending, setIsSending] = useState(false);
 
     const sendRequest = useCallback(async () => {
@@ -36,8 +25,8 @@ export const A2 = () => {
                 {
                     method: 'POST',
                     body: JSON.stringify({
-                        code1: codes[code1],
-                        code2: codes[0],
+                        code1: (isLarge ? large : small)[code1],
+                        code2: (isLarge ? large : small)[0],
                         types: getTypes(types)
                     }),
                     headers: {
@@ -60,12 +49,15 @@ export const A2 = () => {
 
     const run = () => {
         try {
+            const codes = isLarge ? large : small;
+            console.time('Multithread' + codes.length);
             const result = window.main.multithread(codes, codes.map(() => codes[code1]), getTypes(types));
             if (result.includes(-1)) {
                 enqueueSnackbar('Error occurred in parsing', { variant: 'error' });
             } else {
                 setSimilarities(result);
             }
+            console.timeEnd('Multithread' + codes.length);
         } catch ({ message }) {
             enqueueSnackbar(message, { variant: 'error' });
         }
@@ -80,16 +72,13 @@ export const A2 = () => {
         setTypes(event.target.value);
     };
 
+    const handleCheck = () => {
+        setIsLarge((prev) => !prev);
+    };
+
     return (
         <div>
-            <ExpansionPanel>
-                <ExpansionPanelSummary>sample code</ExpansionPanelSummary>
-                <ExpansionPanelDetails className={classes.codeContainer}>
-                    <Typography variant='h4'>code 1</Typography>
-                    <Divider />
-                    <CodeHighlight language='cpp'>{codes[code1]}</CodeHighlight>
-                </ExpansionPanelDetails>
-            </ExpansionPanel>
+            <Expansion code1={(isLarge ? large : small)[code1]} />
             <div className={classes.itemContainer}>
                 <TextField
                     select
@@ -97,20 +86,27 @@ export const A2 = () => {
                     value={code1}
                     onChange={setCode}
                 >
-                    {codes.map((i, j) => <MenuItem key={j} value={j}>{j}</MenuItem>)}
+                    {(isLarge ? large : small).map((i, j) => <MenuItem key={j} value={j}>{j}</MenuItem>)}
                 </TextField>
                 <TextField
                     label='types'
                     value={types}
                     onChange={handleInput}
                 />
+                <FormControlLabel
+                    control={<Checkbox checked={isLarge} onChange={handleCheck} color='primary' />}
+                    label='Switch to Large Sample'
+                />
                 <Button onClick={run}>Multithreading</Button>
-                <Button onClick={sendRequest}>Send Request</Button>
+                <Button onClick={sendRequest}>Send Request </Button>
             </div>
             <div className={classes.resultContainer}>
+                <Typography variant='caption' display='block'>Notification:</Typography>
+                <Typography variant='caption' display='block'>Server should be launched when sending request</Typography>
+                <Typography variant='caption' display='block'>Large samples may take a lot of time depending on performance of CPU</Typography>
                 {similarities.map((i, j) => <div key={j}>
                     <FormControl>
-                        <InputLabel htmlFor='similarity'>Similarity</InputLabel>
+                        <InputLabel htmlFor='similarity'>{`Similarity of ${j} and ${code1}`}</InputLabel>
                         <Input
                             id='similarity'
                             value={i * 100}

@@ -21,11 +21,11 @@ class Parser : Grammar {
             return params;
         }
         while (curr.name == TYPE) {
-            if (curr.value != "void") {
+            if (curr.value == "void" && tokens[index + 1].value == ")") {
+                next();
+            } else {
                 Declaration declaration = parseDeclaration(parseType(), "ParameterDeclaration");
                 params.push_back(declaration);
-            } else {
-                next();
             }
             if (lookahead(")")) {
                 return params;
@@ -103,7 +103,7 @@ class Parser : Grammar {
             consume("(");
             auto init = parseStatement(false);
             auto cond = parseExpression(";", false);
-            auto step = parseExpression(")", false);
+            auto step = parseExpression(")", true);
             auto body = parseBody();
             return ForStatement(lineNumber, lineOffset, init, cond, step, body);
         } else if (lookahead("return")) {
@@ -323,20 +323,27 @@ class Parser : Grammar {
         int lineOffset = curr.lineOffset;
         do {
             hasModifier = false;
-            if (curr.type == TYPE_MODIFIER) {
+            if (curr.type == TYPE_MODIFIER && curr.value != "struct" && curr.value != "enum") {
                 modifiers.push_back(curr.value);
                 hasModifier = true;
                 next();
             }
         } while (hasModifier);
-        if (curr.type == TYPE_NAME) {
+        if (curr.value == "struct" || curr.value == "enum") {
+            modifiers.push_back(curr.value);
+            next();
             name = curr.value;
             next();
-        } else if (!modifiers.empty()) {
-            name = modifiers.back();
-            modifiers.pop_back();
         } else {
-            throw unexpected("correct type name");
+            if (curr.type == TYPE_NAME) {
+                name = curr.value;
+                next();
+            } else if (!modifiers.empty()) {
+                name = modifiers.back();
+                modifiers.pop_back();
+            } else {
+                throw unexpected("correct type name");
+            }
         }
         bool isPointer = false;
         while (curr.value == "*") {

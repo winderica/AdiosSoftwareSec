@@ -1,23 +1,10 @@
-import {
-    Button,
-    Divider,
-    ExpansionPanel,
-    ExpansionPanelDetails,
-    ExpansionPanelSummary,
-    FormControl,
-    Input,
-    InputAdornment,
-    InputLabel,
-    MenuItem,
-    TextField,
-    Typography
-} from '@material-ui/core';
+import { Button, FormControl, Input, InputAdornment, InputLabel, MenuItem, TextField } from '@material-ui/core';
 import { useSnackbar } from 'notistack';
 import React, { ChangeEvent, useState } from 'react';
 import codes from '../../samples/R3.json';
 import { useStyles } from '../../styles/style';
 import { getTypes } from '../../utils/getTypes';
-import { CodeHighlight } from '../Highlight';
+import { Expansion } from '../Expansion';
 
 export const R3 = () => {
     const { enqueueSnackbar } = useSnackbar();
@@ -25,11 +12,13 @@ export const R3 = () => {
     const classes = useStyles();
     const [code1, setCode1] = useState(0);
     const [code2, setCode2] = useState(0);
-    const [types, setTypes] = useState('strbuf,column_data,string_list,column_options');
+    const [types, setTypes] = useState('size_t,subprocess_start_fn,FILE');
 
     const run = () => {
         try {
+            console.time('CFG');
             setSimilarity(window.main.compareCFG(codes[code1], codes[code2], getTypes(types)) * 100);
+            console.timeEnd('CFG');
         } catch ({ message }) {
             enqueueSnackbar(message, { variant: 'error' });
         }
@@ -55,17 +44,7 @@ export const R3 = () => {
 
     return (
         <div>
-            <ExpansionPanel>
-                <ExpansionPanelSummary>sample code</ExpansionPanelSummary>
-                <ExpansionPanelDetails className={classes.codeContainer}>
-                    <Typography variant='h4'>code 1</Typography>
-                    <Divider />
-                    <CodeHighlight language='cpp'>{codes[code1]}</CodeHighlight>
-                    <Typography variant='h4'>code 2</Typography>
-                    <Divider />
-                    <CodeHighlight language='cpp'>{codes[code2]}</CodeHighlight>
-                </ExpansionPanelDetails>
-            </ExpansionPanel>
+            <Expansion code1={codes[code1]} code2={codes[code2]} />
             <div className={classes.itemContainer}>
                 <TextField
                     select
